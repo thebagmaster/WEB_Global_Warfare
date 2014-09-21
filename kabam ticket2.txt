@@ -1,0 +1,31 @@
+2000 Mobile Sams
+2300 Tanks
+500 Hellfires
+2000 special forces
+
+KILLED
+
+500 Sams
+22866 Tanks
+5250 Fighters
+500 Stealths
+3381 HELLFIRES
+18900 Artillery
+
+------------------------
+
+10000 tanks
+1500 hellfires
+
+KILLED
+
+1854 Fighters
+7740 Gunships
+4011 Bombers
+394 Stealths
+6855 Predators
+7396 Cargo
+66164 Artillery
+
+-------------------------
+

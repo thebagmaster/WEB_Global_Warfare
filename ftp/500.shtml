@@ -1,0 +1,6 @@
+<h1>500 Internal server error</h1>
+<!--#echo var="REMOTE_ADDR" -->
+<!--#echo var="REQUEST_URI" -->
+<!-- 
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
+--> 

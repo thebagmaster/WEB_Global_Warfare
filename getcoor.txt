@@ -1,0 +1,183 @@
+// ==UserScript==
+// @name       Get Map Coords real DB
+// @namespace  http://use.i.E.your.homepage/
+// @version    1.0
+// @description  GW Hack
+// @include    http://www2.globalwarfaregame.com/src/main_src.php*
+// @copyright  2011+, You             
+// ==/UserScript==
+
+window.enable = 0;
+window.mapCntX = 0;
+window.mapCntY = 0;
+window.params2 = "";
+setTimeout("makeButtons();", 5000);
+window.timer = setTimeout("window.getCnt();", 3000);
+
+window.getCnt = function() 
+ {
+    var url = "http://www.bagmaster.x10.mx/get_coords.php";
+    var http = new XMLHttpRequest();
+    http.open("POST", url, true);
+    http.onreadystatechange = function () {
+        if (http.readyState == 4) 
+        {
+            window.mapCntX = parseInt(http.responseText.split(",")[0]);
+            window.mapCntY = parseInt(http.responseText.split(",")[1])-20;
+            window.timer = setInterval("window.popMap();", 5000);
+        }
+    }
+    http.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    http.send();
+}
+window.setCnt = function() {
+    var url = "http://www.bagmaster.x10.mx/get_coords.php";
+    var http2 = new XMLHttpRequest();
+    http2.open("POST", url, true);
+    http2.onreadystatechange = function () {
+        if (http2.readyState == 4) 
+            console.warn(window.http.responseText);
+    }
+    var params = "x=" + window.mapCntX + "&y=" + window.mapCntY;
+    http2.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    http2.send(params);
+}
+
+window.popMap = function() {
+    var h = [];
+    var d = "bl_" + window.mapCntX + "_bt_" + window.mapCntY;
+    h.push(d);
+    var blocklist = h;
+    var blocklistcnt = blocklist.length;
+    var blockString = blocklist.join(",");
+    var params = Object.clone(g_ajaxparams);
+    params.blocks = blockString;
+    new Ajax.Request(g_ajaxpath + "fetchMapTiles.php" + g_ajaxsuffix, {
+        method: "post",
+        parameters: params,
+        onSuccess: function (transport) {
+            var rslt = eval("(" + transport.responseText + ")");
+            if (rslt.ok) {
+                var Z = new Hash(rslt.data);
+                var A = Z.keys();
+                var V = A.length;
+                var J = seed.cities[0];
+                window.params2 = "";
+                for (var T = 0; T < V; T++) {
+                    var s = A[T];
+                    var W = "tip_" + A[T];
+                    var M = Z.get(s);
+                    var aa = parseInt(M.xCoord);
+                    var w = parseInt(M.yCoord);
+                    var O = M.tileLevel;
+                    var X = M.cityName;
+                    var U = parseInt(M.tileAllianceId) === 0 ? null : M.tileAllianceId;
+                    var c = U === null ? null : rslt.allianceNames["a" + U];
+                    var g = rslt.userInfo["u" + M.tileUserId];
+                    if (g && g.length != 0)
+                    {
+                        var f = g.m;
+                        var n = g.n;
+                        var lvl = g.t;
+                    }
+                    else
+                    {
+                        var f = 0;
+                        var n = "";
+                        var lvl = "";
+                    }
+                    window.textAdd(T, aa, w, M.tileType, O, c, f, n, lvl, X);
+                }
+                var url = "http://www.bagmaster.x10.mx/send_data.php";
+                window.http = new XMLHttpRequest();
+                window.http.open("POST", url, true);
+                window.http.onreadystatechange = function () {
+                    if (window.http.readyState == 4) 
+                        console.warn(window.http.responseText);
+                }
+                window.params2 = window.params2.substring(0, window.params2.length-1); 
+                window.http.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                window.http.send(window.params2);
+                window.params2 = "";
+                window.setCnt();
+            }},
+        onFailure: function () {}
+    });
+    if(!(window.mapCntX >= 795 && window.mapCntY >= 795))
+       {
+           if(window.mapCntY >= 795)
+           {
+               window.mapCntY = 0;
+               window.mapCntX += 5;
+           }
+           else
+           {
+               window.mapCntY += 5;
+           }
+           $('go').innerHTML = window.mapCntX + ' , ' + window.mapCntY;
+       }
+    else
+    {
+        window.mapCntX = 0;
+        window.mapCntY = 0;
+    }
+}
+    
+window.textAdd = function(i, x, y, type, tlvl, alli, pow, name, lvl, city) 
+    {
+        if(pow == undefined || pow == 0)
+            pow = "";
+        if(alli == null)
+            alli = "";
+        if(city == null)
+            city = "";
+        //var str = ("<div class=\'tile t" + type + "\' style=\'top:" + x*50 + ";left:" + y*50 + ";\'>" + lvl + "(" + x + "," + y + ") " + name + " " + addCommas(pow) + " " + alli + "</div>\n");
+        //console.warn(str);
+        var id = ((x-1)*5 + y) + (Math.floor((y-1)/5)*20) + (Math.floor((x-1)/5)*4000);
+        window.params2 += (
+            "id"+ i +"=" + id +
+            "&x"+ i +"=" + x +
+            "&y"+ i +"=" + y +
+            "&type"+ i +"=" + type +
+            "&tlvl"+ i +"=" + tlvl +
+            "&name"+ i +"=" + name +
+            "&lvl"+ i +"=" + lvl +
+            "&power"+ i +"=" + pow +
+            "&city"+ i +"=" + city +
+            "&alli"+ i +"=" + alli + "&");
+    } 
+
+    
+    
+window.makeButtons = function ()
+    {
+        var goDiv = document.createElement('div');
+        goDiv.setAttribute('id', 'go');
+        goDiv.style.height = '20px';
+        goDiv.style.width = '70px';
+        goDiv.style.top = '50px';
+        goDiv.style.left = '0px';
+        goDiv.style.position = 'absolute';
+        goDiv.style.backgroundColor = 'green';
+        goDiv.style.zIndex = "998";
+        goDiv.style.cursor='hand';
+        goDiv.style.border='2px solid #000';
+        goDiv.style.webkitUserSelect = 'none';
+        goDiv.onclick = function(){window.timer = setInterval("window.popMap();", 5000);}
+            
+        var stopDiv = document.createElement('div');
+        stopDiv.setAttribute('id', 'stop');
+        stopDiv.style.height = '20px';
+        stopDiv.style.width = '50px';
+        stopDiv.style.top = '50px';
+        stopDiv.style.left = '70px';
+        stopDiv.style.position = 'absolute';
+        stopDiv.style.backgroundColor = 'red';
+        stopDiv.style.zIndex = "998";
+        stopDiv.style.cursor='hand';
+        stopDiv.style.border='2px solid #000';
+        stopDiv.onclick = function(){clearInterval(window.timer);}
+    
+        document.getElementById("mainbody").appendChild(goDiv);
+        document.getElementById("mainbody").appendChild(stopDiv);
+    }
